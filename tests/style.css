@@ -17,23 +17,87 @@ body {
     display: none !important;
 }
 
+/* 遊戲頂部狀態列 */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    color: #f5f6fa;
+    font-size: 14px;
+}
+
+#btn-open-auth {
+    padding: 6px 14px;
+    background-color: #0097e6;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#btn-signout {
+    padding: 6px 14px;
+    background-color: #c23616;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#stage {
+    background-color: #f5f6fa;
+    border-radius: 4px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    display: block;
+}
+
+/* 彈出視窗半透明背景遮罩 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.65);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
 /* 登入面板樣式 */
 #login-panel {
     background-color: #f5f6fa;
-    width: 300px;
-    padding: 25px;
+    width: 320px;
+    padding: 22px;
     border-radius: 6px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
-#login-panel h2 {
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
     margin: 0;
     color: #2f3640;
-    text-align: center;
-    font-size: 20px;
+    font-size: 18px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: #718093;
+    cursor: pointer;
 }
 
 #login-panel input {
@@ -71,30 +135,4 @@ body {
     font-size: 13px;
     text-align: center;
     color: #e84118;
-}
-
-/* 遊戲區域樣式 */
-.header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    color: #f5f6fa;
-    font-size: 14px;
-}
-
-#btn-signout {
-    padding: 6px 12px;
-    background-color: #c23616;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-#stage {
-    background-color: #f5f6fa;
-    border-radius: 4px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-    display: block;
 }

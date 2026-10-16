@@ -3,32 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>網頁遊戲 - 登入與移動系統</title>
+    <title>網頁遊戲 - 免登入即玩版</title>
     <link rel="stylesheet" href="style.css">
     <!-- 載入 Supabase 官方 SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- 帳號驗證面板 (預設顯示) -->
-    <section id="login-panel">
-        <h2>玩家認證</h2>
-        <input type="email" id="input-email" placeholder="輸入電子信箱" autocomplete="email">
-        <input type="password" id="input-pass" placeholder="輸入密碼 (至少 6 位數)" autocomplete="current-password">
-        <div class="action-row">
-            <button type="button" id="btn-signin">登入</button>
-            <button type="button" id="btn-register">註冊</button>
-        </div>
-        <div id="status-text"></div>
-    </section>
-
-    <!-- 遊戲主畫面 (預設隱藏，登入後開啟) -->
-    <main id="play-area" class="hidden">
+    <!-- 遊戲主畫面 (預設直接顯示) -->
+    <main id="play-area">
         <header class="header-bar">
-            <span id="player-label"></span>
-            <button type="button" id="btn-signout">登出系統</button>
+            <span id="player-label">狀態：遊客模式 (未綁定)</span>
+            <div class="top-actions">
+                <button type="button" id="btn-open-auth">登入 / 綁定帳號</button>
+                <button type="button" id="btn-signout" class="hidden">登出</button>
+            </div>
         </header>
         <canvas id="stage" width="800" height="600"></canvas>
     </main>
+
+    <!-- 登入與綁定彈出視窗 (預設隱藏，點擊右上角才開啟) -->
+    <div id="auth-modal" class="modal-overlay hidden">
+        <section id="login-panel">
+            <div class="modal-header">
+                <h2>帳號登入 / 註冊綁定</h2>
+                <button type="button" id="btn-close-auth" class="close-btn">&times;</button>
+            </div>
+            <input type="text" id="input-account" placeholder="輸入遊戲帳號 (英數字)" autocomplete="username">
+            <input type="password" id="input-pass" placeholder="輸入密碼 (至少 6 位數)" autocomplete="current-password">
+            <div class="action-row">
+                <button type="button" id="btn-signin">登入既有帳號</button>
+                <button type="button" id="btn-register">註冊並綁定</button>
+            </div>
+            <div id="status-text"></div>
+        </section>
+    </div>
 
     <script src="main.js"></script>
 </body>
