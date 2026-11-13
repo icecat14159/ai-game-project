@@ -3,41 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>網頁遊戲 - 免登入即玩版</title>
+    <title>帳號系統demo</title>
     <link rel="stylesheet" href="style.css">
-    <!-- 載入 Supabase 官方 SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- 遊戲主畫面 (預設直接顯示) -->
+    <!-- 遊戲主畫面 -->
     <main id="play-area">
         <header class="header-bar">
-            <span id="player-label">狀態：遊客模式 (未綁定)</span>
-            <div class="top-actions">
-                <button type="button" id="btn-open-auth">登入 / 綁定帳號</button>
+            <div>
+                <span id="player-label">目前狀態：遊客（未綁定）</span>
+                <!-- 新增獨立按鈕，預設隱藏，登入後才顯示 -->
+                <button type="button" id="btn-player-profile" class="text-btn hidden" style="margin-left: 10px;">📋 玩家資訊</button>
+            </div>
+            <div>
+                <button type="button" id="btn-open-auth">登入 / 註冊</button>
                 <button type="button" id="btn-signout" class="hidden">登出</button>
             </div>
         </header>
         <canvas id="stage" width="800" height="600"></canvas>
     </main>
 
-    <!-- 登入與綁定彈出視窗 (預設隱藏，點擊右上角才開啟) -->
+    <!-- 帳號登入 / 註冊 彈出視窗 -->
     <div id="auth-modal" class="modal-overlay hidden">
-        <section id="login-panel">
+        <section class="modal-panel">
             <div class="modal-header">
-                <h2>帳號登入 / 註冊綁定</h2>
-                <button type="button" id="btn-close-auth" class="close-btn">&times;</button>
+                <h2>帳號系統</h2>
+                <button type="button" id="btn-close-auth" class="close-btn">✕</button>
             </div>
-            <input type="text" id="input-account" placeholder="輸入遊戲帳號 (英數字)" autocomplete="username">
-            <input type="password" id="input-pass" placeholder="輸入密碼 (至少 6 位數)" autocomplete="current-password">
+            
+            <!-- 頁籤切換 -->
+            <div class="tabs">
+                <button type="button" id="tab-login" class="tab-btn active">登入</button>
+                <button type="button" id="tab-register" class="tab-btn">註冊</button>
+            </div>
+
+            <!-- 共用欄位 -->
+            <input type="text" id="input-account" placeholder="輸入遊戲帳號 (支援中文、英數)">
+            <p class="warning-text">⚠️ 提醒：請勿輸入您的敏感資料（如真實姓名、常用電子郵件）</p>
+            <input type="password" id="input-pass" placeholder="輸入密碼 (至少 6 位數)">
+            
+            <!-- 註冊專用欄位 (預設隱藏) -->
+            <input type="password" id="input-pass-confirm" class="hidden" placeholder="再次確認密碼">
+            
             <div class="action-row">
-                <button type="button" id="btn-signin">登入既有帳號</button>
-                <button type="button" id="btn-register">註冊並綁定</button>
+                <button type="button" id="btn-submit-auth" class="primary-btn">登入</button>
             </div>
             <div id="status-text"></div>
         </section>
     </div>
 
-    <script src="main.js"></script>
+    <!-- 玩家資訊欄 彈出視窗 -->
+    <div id="profile-modal" class="modal-overlay hidden">
+        <section class="modal-panel profile-panel">
+            <div class="modal-header">
+                <h2>玩家資訊</h2>
+                <button type="button" id="btn-close-profile" class="close-btn">✕</button>
+            </div>
+            <div class="profile-content">
+                <p><strong>遊戲名稱：</strong><span id="profile-display-name"></span></p>
+                <p><strong>帳號狀態：</strong>已綁定正式帳號</p>
+                <p class="hint-text">（未來將在此處擴充裝備、成就、分數等詳細資料）</p>
+            </div>
+            <hr class="divider">
+            <div class="password-change-section">
+                <h3>變更密碼</h3>
+                <input type="password" id="input-old-pass" placeholder="輸入當前密碼">
+                <input type="password" id="input-new-pass" placeholder="輸入新密碼 (至少 6 位數)">
+                <input type="password" id="input-new-pass-confirm" placeholder="再次確認新密碼">
+                <button type="button" id="btn-change-pass" class="secondary-btn">確認修改密碼</button>
+                <div id="profile-status-text"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="game.js"></script>
+    <script src="auth.js"></script>
 </body>
 </html>
