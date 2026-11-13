@@ -1,15 +1,46 @@
+/* ========================================================
+   AI Game Project - 核心樣式表 (style.css)
+   ======================================================== */
+
+:root {
+    --bg-main: #1e272e;
+    --bg-panel: #f5f6fa;
+    --bg-card: #ffffff;
+    --primary: #0097e6;
+    --primary-hover: #00a8ff;
+    --secondary: #718093;
+    --secondary-hover: #57606f;
+    --success: #44bd32;
+    --success-hover: #4cd137;
+    --danger: #c23616;
+    --danger-hover: #e84118;
+    --warning: #e1b12c;
+    --text-dark: #2f3640;
+    --text-light: #f5f6fa;
+    --text-muted: #718093;
+    --border-color: #dcdde1;
+    --border-radius: 8px;
+    --shadow-main: 0 10px 25px rgba(0, 0, 0, 0.45);
+    --shadow-canvas: 0 6px 20px rgba(0, 0, 0, 0.4);
+    --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ================= 1. 重設與基礎佈局 ================= */
 * {
     box-sizing: border-box;
 }
 
-body {
+html, body {
     margin: 0;
+    padding: 0;
+    width: 100%;
     height: 100vh;
+    font-family: var(--font-stack);
+    background-color: var(--bg-main);
+    color: var(--text-dark);
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #1e272e;
-    font-family: system-ui, -apple-system, sans-serif;
     overflow: hidden;
 }
 
@@ -17,66 +48,165 @@ body {
     display: none !important;
 }
 
-/* 遊戲頂部狀態列 */
+/* ================= 2. 遊戲主畫面容器 ================= */
+#play-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 頂部狀態與操作列 */
 .header-bar {
+    width: 800px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    color: #f5f6fa;
+    margin-bottom: 12px;
+    color: var(--text-light);
     font-size: 14px;
 }
 
-#btn-open-auth {
-    padding: 6px 14px;
-    background-color: #0097e6;
-    color: #ffffff;
+.header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#player-label {
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+/* 頂部文字型按鈕 */
+.text-btn {
+    background: none;
     border: none;
-    border-radius: 4px;
+    color: var(--text-light);
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.text-btn:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--primary-hover);
+}
+
+.text-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 頂部主要按鈕 */
+#btn-open-auth, #btn-signout {
+    padding: 7px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#btn-open-auth {
+    background-color: var(--primary);
+}
+
+#btn-open-auth:hover {
+    background-color: var(--primary-hover);
 }
 
 #btn-signout {
-    padding: 6px 14px;
-    background-color: #c23616;
-    color: #ffffff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+    background-color: var(--danger);
 }
 
+#btn-signout:hover {
+    background-color: var(--danger-hover);
+}
+
+#btn-open-auth:active, #btn-signout:active {
+    transform: scale(0.97);
+}
+
+/* 遊戲畫布 (Canvas) */
 #stage {
-    background-color: #f5f6fa;
-    border-radius: 4px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    background-color: #ffffff;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-canvas);
     display: block;
+    outline: none;
 }
 
-/* 彈出視窗半透明背景遮罩 */
+/* 底部操作提示 */
+.controls-hint {
+    margin-top: 10px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.controls-hint kbd {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ================= 3. 彈出視窗與遮罩 ================= */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.65);
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(2px);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease;
 }
 
-/* 登入面板樣式 */
-#login-panel {
-    background-color: #f5f6fa;
-    width: 320px;
-    padding: 22px;
-    border-radius: 6px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-panel {
+    background-color: var(--bg-panel);
+    width: 360px;
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-main);
     display: flex;
     flex-direction: column;
     gap: 14px;
+    animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(15px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.profile-panel {
+    width: 420px;
 }
 
 .modal-header {
@@ -87,103 +217,250 @@ body {
 
 .modal-header h2 {
     margin: 0;
-    color: #2f3640;
     font-size: 18px;
+    color: var(--text-dark);
+    font-weight: 700;
 }
 
 .close-btn {
     background: none;
     border: none;
-    font-size: 24px;
+    font-size: 20px;
     line-height: 1;
-    color: #718093;
+    color: var(--text-muted);
     cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s, color 0.2s;
 }
 
-#login-panel input {
-    padding: 10px;
-    border: 1px solid #dcdde1;
-    border-radius: 4px;
+.close-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-dark);
+}
+
+/* ================= 4. 頁籤切換 ================= */
+.tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 6px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    background: none;
+    border: none;
     font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+    position: relative;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary);
+    border-radius: 3px 3px 0 0;
+}
+
+/* ================= 5. 表單輸入與按鈕 ================= */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal-panel input[type="text"],
+.modal-panel input[type="password"] {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: var(--bg-card);
+    color: var(--text-dark);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-panel input[type="text"]:focus,
+.modal-panel input[type="password"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 151, 230, 0.15);
+}
+
+.warning-text {
+    font-size: 12px;
+    color: var(--warning);
+    margin: 0;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+.hint-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
 }
 
 .action-row {
     display: flex;
     gap: 10px;
+    margin-top: 4px;
 }
 
-.action-row button {
+.primary-btn, .secondary-btn {
     flex: 1;
-    padding: 10px;
+    padding: 12px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     color: #ffffff;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s, opacity 0.2s;
 }
 
-#btn-signin {
-    background-color: #0097e6;
+.primary-btn {
+    background-color: var(--primary);
 }
 
-#btn-register {
-    background-color: #44bd32;
+.primary-btn:hover:not(:disabled) {
+    background-color: var(--primary-hover);
 }
 
-#status-text {
-    min-height: 18px;
+.secondary-btn {
+    background-color: var(--success);
+}
+
+.secondary-btn:hover:not(:disabled) {
+    background-color: var(--success-hover);
+}
+
+.primary-btn:disabled, .secondary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.primary-btn:active:not(:disabled), .secondary-btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+#status-text, #profile-status-text {
+    min-height: 20px;
     font-size: 13px;
     text-align: center;
-    color: #e84118;
+    color: var(--danger);
+    font-weight: 600;
+    word-break: break-all;
 }
 
-/* (保留原本的 body, #stage, header-bar 樣式，此處僅列出新增與修改部分) */
-* { box-sizing: border-box; }
-body {
-    margin: 0; height: 100vh; display: flex; justify-content: center;
-    align-items: center; background-color: #1e272e; font-family: system-ui, sans-serif;
-    overflow: hidden;
+/* ================= 6. 玩家設定面板 ================= */
+.tab-content {
+    display: none;
 }
-.hidden { display: none !important; }
 
-/* 頂部按鈕 */
-.header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: #f5f6fa; }
-.text-btn { background: none; border: none; color: #f5f6fa; font-size: 15px; cursor: pointer; text-decoration: underline; font-weight: bold; }
-.text-btn:hover { color: #00a8ff; }
-#btn-open-auth, #btn-signout { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; color: #fff;}
-#btn-open-auth { background-color: #0097e6; }
-#btn-signout { background-color: #c23616; }
-#stage { background-color: #f5f6fa; border-radius: 4px; box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4); display: block; }
-
-/* 彈出視窗遮罩與面板 */
-.modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background-color: rgba(0, 0, 0, 0.7); display: flex; justify-content: center; align-items: center; z-index: 100;
+.tab-content.active {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
-.modal-panel {
-    background-color: #f5f6fa; width: 340px; padding: 20px 25px;
-    border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 12px;
+
+.profile-content {
+    background-color: var(--bg-card);
+    padding: 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
 }
-.modal-header { display: flex; justify-content: space-between; align-items: center; }
-.modal-header h2 { margin: 0; color: #2f3640; font-size: 18px; }
-.close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: #718093; }
 
-/* 頁籤設計 */
-.tabs { display: flex; border-bottom: 2px solid #dcdde1; margin-bottom: 5px; }
-.tab-btn { flex: 1; padding: 10px; background: none; border: none; font-size: 15px; font-weight: bold; color: #718093; cursor: pointer; }
-.tab-btn.active { color: #0097e6; border-bottom: 3px solid #0097e6; margin-bottom: -2px; }
+.profile-content p {
+    margin: 6px 0;
+    color: var(--text-dark);
+    font-size: 14px;
+}
 
-/* 表單與按鈕 */
-.modal-panel input { padding: 10px; border: 1px solid #dcdde1; border-radius: 4px; font-size: 14px; }
-.warning-text { font-size: 12px; color: #e1b12c; margin: 0; line-height: 1.4; font-weight: 600; }
-.hint-text { font-size: 12px; color: #7f8fa6; margin: 0; }
-.primary-btn { padding: 12px; background-color: #0097e6; border: none; border-radius: 4px; color: #fff; font-weight: bold; cursor: pointer; }
-.secondary-btn { padding: 10px; background-color: #44bd32; border: none; border-radius: 4px; color: #fff; font-weight: bold; cursor: pointer; }
-#status-text, #profile-status-text { min-height: 18px; font-size: 13px; text-align: center; color: #e84118; }
+.divider {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    margin: 4px 0;
+}
 
-/* 資訊欄特殊樣式 */
-.profile-panel { width: 380px; }
-.profile-content p { margin: 5px 0; color: #2f3640; }
-.divider { border: 0; border-top: 1px solid #dcdde1; width: 100%; margin: 5px 0; }
-.password-change-section { display: flex; flex-direction: column; gap: 10px; }
-.password-change-section h3 { margin: 0; font-size: 15px; color: #2f3640; }
+.password-change-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.password-change-section h3 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-dark);
+    font-weight: 700;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    background-color: var(--bg-card);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.setting-item select {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    font-size: 14px;
+    background-color: #fff;
+    cursor: pointer;
+    outline: none;
+}
+
+.setting-item select:focus {
+    border-color: var(--primary);
+}
+
+/* ================= 7. 浮動提示字卡 (Toast) ================= */
+.toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(46, 204, 113, 0.95);
+    color: #ffffff;
+    padding: 9px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    z-index: 2000;
+    opacity: 1;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+}
+
+.toast.toast-error {
+    background-color: rgba(232, 65, 24, 0.95);
+}
+
+.toast.fade-out {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+}

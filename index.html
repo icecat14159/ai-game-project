@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Game Project - 導覽入口</title>
+    <!-- 若啟用 JavaScript 則自動導向主遊戲畫面 -->
+    <script>
+        window.location.replace("tests/MainScreen.html");
+    </script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #1e272e;
+            color: #f5f6fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            background-color: #2f3640;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            max-width: 480px;
+        }
+        h1 { margin-top: 0; font-size: 22px; color: #00a8ff; }
+        p { color: #dcdde1; font-size: 14px; line-height: 1.6; }
+        .links { margin-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+        .btn {
+            display: block;
+            padding: 12px;
+            background-color: #0097e6;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn:hover { background-color: #00a8ff; }
+        .btn.secondary { background-color: #718093; }
+        .btn.secondary:hover { background-color: #57606f; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 AI Game Project</h1>
+        <p>正在為您導向遊戲主畫面，若瀏覽器未自動跳轉，請點擊下方按鈕：</p>
+        <div class="links">
+            <a href="tests/MainScreen.html" class="btn">🚀 進入遊戲主畫面 (MainScreen.html)</a>
+            <a href="tests/index.html" class="btn secondary">🛡️ 防詐騙 AI 互動樂園原型 (index.html)</a>
+        </div>
+    </div>
+</body>
+</html>

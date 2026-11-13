@@ -3,81 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>帳號系統demo</title>
+    <title>AI 遊戲帳號與存檔系統</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Supabase JavaScript SDK v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+    <!-- 頂部浮動存檔與狀態提示 (Toast) -->
+    <div id="save-toast" class="toast hidden" role="status" aria-live="polite">當前狀態已儲存</div>
+
     <!-- 遊戲主畫面 -->
     <main id="play-area">
         <header class="header-bar">
-            <div>
+            <div class="header-left">
                 <span id="player-label">目前狀態：遊客（未綁定）</span>
-                <!-- 新增獨立按鈕，預設隱藏，登入後才顯示 -->
-                <button type="button" id="btn-player-profile" class="text-btn hidden" style="margin-left: 10px;">📋 玩家資訊</button>
+                <button type="button" id="btn-manual-save" class="text-btn hidden" title="立即將當前座標儲存至雲端">💾 手動存檔</button>
+                <button type="button" id="btn-settings" class="text-btn hidden" title="帳號與遊戲設置">⚙️ 設定</button>
             </div>
-            <div>
+            <div class="header-right">
                 <button type="button" id="btn-open-auth">登入 / 註冊</button>
                 <button type="button" id="btn-signout" class="hidden">登出</button>
             </div>
         </header>
-        <canvas id="stage" width="800" height="600"></canvas>
+
+        <!-- 遊戲畫布 -->
+        <canvas id="stage" width="800" height="600" tabindex="0"></canvas>
+
+        <!-- 操作提示列 -->
+        <footer class="controls-hint">
+            <span>🎮 移動控制：<kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> 或 <kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd></span>
+        </footer>
     </main>
 
     <!-- 帳號登入 / 註冊 彈出視窗 -->
-    <div id="auth-modal" class="modal-overlay hidden">
+    <div id="auth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
         <section class="modal-panel">
             <div class="modal-header">
-                <h2>帳號系統</h2>
-                <button type="button" id="btn-close-auth" class="close-btn">✕</button>
+                <h2 id="auth-modal-title">帳號系統</h2>
+                <button type="button" id="btn-close-auth" class="close-btn" aria-label="關閉視窗">✕</button>
             </div>
             
-            <!-- 頁籤切換 -->
+            <!-- 頁籤切換：登入 / 註冊 -->
             <div class="tabs">
                 <button type="button" id="tab-login" class="tab-btn active">登入</button>
                 <button type="button" id="tab-register" class="tab-btn">註冊</button>
             </div>
 
-            <!-- 共用欄位 -->
-            <input type="text" id="input-account" placeholder="輸入遊戲帳號 (支援中文、英數)">
-            <p class="warning-text">⚠️ 提醒：請勿輸入您的敏感資料（如真實姓名、常用電子郵件）</p>
-            <input type="password" id="input-pass" placeholder="輸入密碼 (至少 6 位數)">
-            
-            <!-- 註冊專用欄位 (預設隱藏) -->
-            <input type="password" id="input-pass-confirm" class="hidden" placeholder="再次確認密碼">
-            
-            <div class="action-row">
-                <button type="button" id="btn-submit-auth" class="primary-btn">登入</button>
-            </div>
-            <div id="status-text"></div>
+            <!-- 輸入表單 -->
+            <form id="auth-form" class="modal-form" onsubmit="return false;">
+                <input type="text" id="input-account" placeholder="輸入遊戲帳號 (支援中文、英數)" autocomplete="username" required>
+                <p class="warning-text">⚠️ 提醒：請勿輸入真實姓名或常用個人密碼等敏感資料</p>
+                <input type="password" id="input-pass" placeholder="輸入密碼 (至少 6 位數)" autocomplete="current-password" required>
+                
+                <!-- 註冊專用欄位 (預設隱藏) -->
+                <input type="password" id="input-pass-confirm" class="hidden" placeholder="再次確認密碼" autocomplete="new-password">
+                
+                <div class="action-row">
+                    <button type="submit" id="btn-submit-auth" class="primary-btn">登入</button>
+                </div>
+            </form>
+            <div id="status-text" role="alert"></div>
         </section>
     </div>
 
-    <!-- 玩家資訊欄 彈出視窗 -->
-    <div id="profile-modal" class="modal-overlay hidden">
+    <!-- 系統設定 彈出視窗 -->
+    <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
         <section class="modal-panel profile-panel">
             <div class="modal-header">
-                <h2>玩家資訊</h2>
-                <button type="button" id="btn-close-profile" class="close-btn">✕</button>
+                <h2 id="settings-modal-title">系統設定</h2>
+                <button type="button" id="btn-close-settings" class="close-btn" aria-label="關閉視窗">✕</button>
             </div>
-            <div class="profile-content">
-                <p><strong>遊戲名稱：</strong><span id="profile-display-name"></span></p>
-                <p><strong>帳號狀態：</strong>已綁定正式帳號</p>
-                <p class="hint-text">（未來將在此處擴充裝備、成就、分數等詳細資料）</p>
+            
+            <!-- 設定頁籤：玩家資訊 / 遊戲設置 -->
+            <div class="tabs">
+                <button type="button" id="tab-profile" class="tab-btn active">玩家資訊</button>
+                <button type="button" id="tab-game-settings" class="tab-btn">遊戲設置</button>
             </div>
-            <hr class="divider">
-            <div class="password-change-section">
-                <h3>變更密碼</h3>
-                <input type="password" id="input-old-pass" placeholder="輸入當前密碼">
-                <input type="password" id="input-new-pass" placeholder="輸入新密碼 (至少 6 位數)">
-                <input type="password" id="input-new-pass-confirm" placeholder="再次確認新密碼">
-                <button type="button" id="btn-change-pass" class="secondary-btn">確認修改密碼</button>
-                <div id="profile-status-text"></div>
+
+            <!-- 頁籤內容：玩家資訊 (預設顯示) -->
+            <div id="content-profile" class="tab-content active">
+                <div class="profile-content">
+                    <p><strong>遊戲名稱：</strong><span id="profile-display-name">-</span></p>
+                    <p><strong>帳號狀態：</strong>已綁定正式帳號</p>
+                </div>
+                <hr class="divider">
+                <form id="password-form" class="password-change-section" onsubmit="return false;">
+                    <h3>變更密碼</h3>
+                    <input type="password" id="input-old-pass" placeholder="輸入當前密碼" autocomplete="current-password" required>
+                    <input type="password" id="input-new-pass" placeholder="輸入新密碼 (至少 6 位數)" autocomplete="new-password" required>
+                    <input type="password" id="input-new-pass-confirm" placeholder="再次確認新密碼" autocomplete="new-password" required>
+                    <button type="submit" id="btn-change-pass" class="secondary-btn">確認修改密碼</button>
+                    <div id="profile-status-text" role="alert"></div>
+                </form>
+            </div>
+
+            <!-- 頁籤內容：遊戲設置 -->
+            <div id="content-game-settings" class="tab-content">
+                <div class="setting-item">
+                    <label for="select-autosave">自動存檔間隔：</label>
+                    <select id="select-autosave">
+                        <option value="5000">每 5 秒</option>
+                        <option value="10000">每 10 秒</option>
+                        <option value="30000">每 30 秒</option>
+                        <option value="60000">每 60 秒</option>
+                        <option value="0">關閉自動存檔</option>
+                    </select>
+                </div>
+                <p class="hint-text">💡 設定會自動儲存至雲端，下次登入將自動載入。</p>
             </div>
         </section>
     </div>
 
+    <!-- 核心腳本載入順序：遊戲引擎 -> 認證模組 -> 存檔與同步模組 -->
     <script src="game.js"></script>
     <script src="auth.js"></script>
+    <script src="save.js"></script>
 </body>
 </html>
