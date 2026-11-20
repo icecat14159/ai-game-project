@@ -1,4 +1,4 @@
-# 🎮 AI Game Project - 2D 畫布遊戲與雲端帳號同步系統
+# 🎮 AI Game Project - 登入暨大地圖畫布系統demo
 
 本專案是一個輕量、模組化且高度可維護的 HTML5 Canvas 2D 冒險遊戲核心系統。前端採用純原生 JavaScript (Vanilla JS) 與 CSS 變數設計系統，無任何繁重的構建工具或依賴，直接開啟即可運行；後端整合 **Supabase** 提供安全的帳號認證（Auth）與即時雲端進度同步（Database Upsert）。
 
@@ -117,11 +117,11 @@ CREATE POLICY "允許玩家更新自身存檔" ON public.player_data
 
 ---
 
-## 🚀 快速啟動方式
+## 🚀 快速啟動方式（開發者）
 
 1. **直接開啟**：
    - 雙擊開啟根目錄下的 `index.html` 或 `tests/MainScreen.html` 即可於現代瀏覽器（Chrome, Edge, Firefox, Safari 等）直接執行。
-2. **透過本地伺服器執行**（建議）：
+2. **透過本地伺服器執行**：
    - 若使用 VS Code，可搭配 **Live Server** 套件開啟根目錄。
    - 或使用任意本地 HTTP 伺服器：
      ```bash
