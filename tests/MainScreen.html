@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AI 遊戲帳號與存檔系統</title>
     <link rel="stylesheet" href="style.css">
     <!-- Supabase JavaScript SDK v2 -->
@@ -14,30 +14,49 @@
 
     <!-- 遊戲主畫面 -->
     <main id="play-area">
+        <!-- 頂部操作列 (電腦與手機雙向自適應) -->
         <header class="header-bar">
             <div class="header-left">
-                <span id="player-label">目前狀態：遊客（未綁定）</span>
-                <button type="button" id="btn-manual-save" class="text-btn hidden" title="立即將當前座標儲存至雲端">💾 手動存檔</button>
-                <button type="button" id="btn-settings" class="text-btn hidden" title="帳號與遊戲設置">⚙️ 設定</button>
+                <span id="player-label">遊客（未綁定）</span>
+                <button type="button" id="btn-manual-save" class="text-btn hidden" title="立即將當前座標儲存至雲端">💾 <span class="btn-label">手動存檔</span></button>
+                <button type="button" id="btn-settings" class="text-btn hidden" title="帳號與遊戲設置">⚙️ <span class="btn-label">設定</span></button>
             </div>
             <div class="header-right">
+                <!-- 座標與地圖資訊 (即時更新) -->
+                <div id="coord-hud" class="coord-badge" title="大地圖座標">📍 X: 0, Y: 0</div>
                 <button type="button" id="btn-open-auth">登入 / 註冊</button>
                 <button type="button" id="btn-signout" class="hidden">登出</button>
             </div>
         </header>
 
-        <!-- 遊戲畫布 -->
-        <canvas id="stage" width="800" height="600" tabindex="0"></canvas>
+        <!-- 遊戲畫布容器 -->
+        <div class="stage-wrapper">
+            <canvas id="stage" width="800" height="600" tabindex="0"></canvas>
+            
+            <!-- 手機虛擬控制搖桿 / 方向鍵 (僅在觸控/手機裝置或小螢幕顯示) -->
+            <div id="touch-controller" class="touch-controller" aria-label="手機虛擬方向鍵">
+                <div class="dpad-center">
+                    <button type="button" class="dpad-btn dpad-up" data-dir="up" aria-label="向上移動">▲</button>
+                    <button type="button" class="dpad-btn dpad-left" data-dir="left" aria-label="向左移動">◀</button>
+                    <button type="button" class="dpad-btn dpad-down" data-dir="down" aria-label="向下移動">▼</button>
+                    <button type="button" class="dpad-btn dpad-right" data-dir="right" aria-label="向右移動">▶</button>
+                    <div class="dpad-core"></div>
+                </div>
+            </div>
+        </div>
 
-        <!-- 操作提示列 -->
+        <!-- 電腦版鍵盤操作提示 -->
         <footer class="controls-hint">
-            <span>🎮 移動控制：<kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> 或 <kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd></span>
+            <span>🎮 移動控制：<kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> 或 <kbd>↑</kbd> <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd>｜支援手機虛擬方向鍵</span>
         </footer>
     </main>
 
-    <!-- 帳號登入 / 註冊 彈出視窗 -->
+    <!-- 帳號登入 / 註冊 彈出視窗 (電腦為中央對話框，手機自動轉為底部抽屜式面板) -->
     <div id="auth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
         <section class="modal-panel">
+            <!-- 手機版抽屜頂部手柄 -->
+            <div class="drawer-handle" aria-hidden="true"></div>
+
             <div class="modal-header">
                 <h2 id="auth-modal-title">帳號系統</h2>
                 <button type="button" id="btn-close-auth" class="close-btn" aria-label="關閉視窗">✕</button>
@@ -66,9 +85,12 @@
         </section>
     </div>
 
-    <!-- 系統設定 彈出視窗 -->
+    <!-- 系統設定 彈出視窗 (電腦為中央對話框，手機自動轉為底部抽屜式面板) -->
     <div id="settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
         <section class="modal-panel profile-panel">
+            <!-- 手機版抽屜頂部手柄 -->
+            <div class="drawer-handle" aria-hidden="true"></div>
+
             <div class="modal-header">
                 <h2 id="settings-modal-title">系統設定</h2>
                 <button type="button" id="btn-close-settings" class="close-btn" aria-label="關閉視窗">✕</button>
