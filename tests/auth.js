@@ -1,7 +1,8 @@
 /**
  * ========================================================
  * 帳號認證與設定管理模組 (auth.js)
- * 負責 Supabase Auth 介面互動、帳號編碼轉換、密碼修改與登入狀態管理
+ * 負責 Supabase Auth 介面互動、帳號編碼轉換、密碼修改、
+ * Google 第三方快速登入與登入狀態管理
  * ========================================================
  */
 
@@ -39,6 +40,9 @@ window.GameApp = window.GameApp || {};
         btnManualSave: document.getElementById('btn-manual-save'),
         playerLabel: document.getElementById('player-label'),
 
+        // Google 第三方快速登入按鈕
+        btnGoogleAuth: document.getElementById('btn-google-auth'),
+
         // 認證表單元素
         authForm: document.getElementById('auth-form'),
         tabLogin: document.getElementById('tab-login'),
@@ -55,6 +59,8 @@ window.GameApp = window.GameApp || {};
         contentProfile: document.getElementById('content-profile'),
         contentGameSettings: document.getElementById('content-game-settings'),
         profileDisplayName: document.getElementById('profile-display-name'),
+        profileAccountStatus: document.getElementById('profile-account-status'),
+        googleNotice: document.getElementById('google-account-notice'),
         passwordForm: document.getElementById('password-form'),
         inputOldPass: document.getElementById('input-old-pass'),
         inputNewPass: document.getElementById('input-new-pass'),
@@ -101,6 +107,9 @@ window.GameApp = window.GameApp || {};
         if (msg.includes('failed to fetch') || msg.includes('network')) {
             return '無法連線至認證伺服器，請檢查網路連線。';
         }
+        if (msg.includes('provider is not enabled') || msg.includes('unsupported provider')) {
+            return 'Google 第三方登入服務尚未在伺服端啟用，請檢查 Supabase 設定。';
+        }
         return errorMsg;
     }
 
@@ -113,7 +122,6 @@ window.GameApp = window.GameApp || {};
         if (show) {
             modalElem.classList.remove('hidden');
             window.isModalOpen = true;
-            // 視窗開啟時強制煞車角色
             if (window.GameApp.game && window.GameApp.game.stopMovement) {
                 window.GameApp.game.stopMovement();
             }
@@ -199,7 +207,52 @@ window.GameApp = window.GameApp || {};
         elements.contentProfile.classList.remove('active');
     });
 
-    // ================= 5. 認證送出處理 =================
+    // ================= 5. Google 第三方 OAuth 快速登入 =================
+    if (elements.btnGoogleAuth) {
+        elements.btnGoogleAuth.addEventListener('click', async () => {
+            const statusText = elements.statusText;
+            statusText.style.color = 'var(--text-muted)';
+            statusText.textContent = '正在啟動 Google 授權...';
+            elements.btnGoogleAuth.disabled = true;
+
+            try {
+                // 安全防呆：Google OAuth 不允許直接以 file:/// 協議進行回呼轉向
+                if (window.location.protocol === 'file:') {
+                    statusText.style.color = 'var(--danger)';
+                    statusText.textContent = '⚠️ Google 登入需在 HTTP/HTTPS 環境下執行 (請使用 VS Code Live Server 或 http://localhost...)';
+                    elements.btnGoogleAuth.disabled = false;
+                    return;
+                }
+
+                // 設定回調跳轉網址
+                const redirectTo = window.location.origin + window.location.pathname;
+
+                const { data, error } = await dbClient.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: {
+                        redirectTo: redirectTo,
+                        queryParams: {
+                            access_type: 'offline',
+                            prompt: 'consent'
+                        }
+                    }
+                });
+
+                if (error) {
+                    statusText.style.color = 'var(--danger)';
+                    statusText.textContent = translateAuthError(error.message);
+                    elements.btnGoogleAuth.disabled = false;
+                }
+            } catch (err) {
+                console.error('[AuthModule] Google 登入呼叫異常:', err);
+                statusText.style.color = 'var(--danger)';
+                statusText.textContent = 'Google 登入連線失敗，請稍後再試。';
+                elements.btnGoogleAuth.disabled = false;
+            }
+        });
+    }
+
+    // ================= 6. 自訂遊戲帳密認證送出處理 =================
     async function handleAuthSubmit() {
         const rawAccount = elements.inputAccount.value.trim();
         const pass = elements.inputPass.value;
@@ -229,7 +282,6 @@ window.GameApp = window.GameApp || {};
 
         const email = encodeAccountToEmail(rawAccount);
 
-        // 設置按鈕防重複點擊狀態
         elements.btnSubmitAuth.disabled = true;
         const originalBtnText = elements.btnSubmitAuth.textContent;
 
@@ -301,11 +353,10 @@ window.GameApp = window.GameApp || {};
         });
     }
 
-    // ================= 6. 登出與強制存檔 =================
+    // ================= 7. 登出與強制存檔 =================
     elements.btnSignout.addEventListener('click', async () => {
         elements.btnSignout.disabled = true;
         try {
-            // 登出前強制觸發最後一次存檔
             if (window.GameApp.save && window.GameApp.save.forceSavePlayer) {
                 await window.GameApp.save.forceSavePlayer();
             } else if (window.forceSavePlayer) {
@@ -319,7 +370,7 @@ window.GameApp = window.GameApp || {};
         }
     });
 
-    // ================= 7. 變更密碼功能 =================
+    // ================= 8. 變更密碼功能 =================
     async function handleChangePassword() {
         const oldPass = elements.inputOldPass.value;
         const newPass = elements.inputNewPass.value;
@@ -356,7 +407,6 @@ window.GameApp = window.GameApp || {};
                 return;
             }
 
-            // 先使用舊密碼重新簽入以確認身分安全
             const { error: verifyError } = await dbClient.auth.signInWithPassword({
                 email: session.user.email,
                 password: oldPass
@@ -399,15 +449,45 @@ window.GameApp = window.GameApp || {};
         });
     }
 
-    // ================= 8. 登入狀態監聽與 UI 同步 =================
+    // ================= 9. 登入狀態監聽與 UI 同步 =================
     dbClient.auth.onAuthStateChange(async (event, session) => {
         if (session && session.user) {
-            const displayName = session.user.user_metadata?.display_name || '冒險者';
+            const meta = session.user.user_metadata || {};
+            // 優先取得使用者顯示名稱 (支援 Google full_name、name 或自訂暱稱)
+            const displayName = meta.display_name 
+                || meta.full_name 
+                || meta.name 
+                || (session.user.email ? session.user.email.split('@')[0] : '冒險者');
+            
+            // 判斷是否為 Google 第三方帳號
+            const authProvider = session.user.app_metadata?.provider || '';
+            const isGoogleUser = authProvider === 'google' || session.user.identities?.some(id => id.provider === 'google');
+            const avatarUrl = meta.avatar_url || meta.picture || null;
 
             elements.playerLabel.textContent = `玩家：${displayName}`;
             elements.btnSettings.classList.remove('hidden');
             elements.btnManualSave.classList.remove('hidden');
             elements.profileDisplayName.textContent = displayName;
+
+            if (elements.profileAccountStatus) {
+                elements.profileAccountStatus.textContent = isGoogleUser ? 'Google 認證帳號 🌐' : '自訂遊戲帳號 🎮';
+            }
+
+            // 若為 Google 登入用戶，隱藏密碼變更表單並顯示免密碼提示
+            if (elements.googleNotice && elements.passwordForm) {
+                if (isGoogleUser) {
+                    elements.googleNotice.classList.remove('hidden');
+                    elements.passwordForm.classList.add('hidden');
+                } else {
+                    elements.googleNotice.classList.add('hidden');
+                    elements.passwordForm.classList.remove('hidden');
+                }
+            }
+
+            // 若 Google 帳號包含使用者頭像，自動換裝
+            if (avatarUrl && window.GameApp.game && window.GameApp.game.setAvatarImage) {
+                window.GameApp.game.setAvatarImage(avatarUrl);
+            }
 
             elements.btnOpenAuth.classList.add('hidden');
             elements.btnSignout.classList.remove('hidden');
@@ -420,15 +500,24 @@ window.GameApp = window.GameApp || {};
                 await window.initPlayerSync(session.user);
             }
         } else {
-            elements.playerLabel.textContent = '目前狀態：遊客（未綁定）';
+            elements.playerLabel.textContent = '遊客（未綁定）';
             elements.btnSettings.classList.add('hidden');
             elements.btnManualSave.classList.add('hidden');
+
+            // 登出時重設角色頭像為預設
+            if (window.GameApp.game && window.GameApp.game.resetAvatarImage) {
+                window.GameApp.game.resetAvatarImage();
+            }
+
+            if (elements.googleNotice && elements.passwordForm) {
+                elements.googleNotice.classList.add('hidden');
+                elements.passwordForm.classList.remove('hidden');
+            }
 
             elements.btnOpenAuth.classList.remove('hidden');
             elements.btnSignout.classList.add('hidden');
             toggleModal(elements.settingsModal, false);
 
-            // 呼叫 save 模組清除計時器並將角色重設至起點
             if (window.GameApp.save && window.GameApp.save.clearPlayerSync) {
                 window.GameApp.save.clearPlayerSync();
             } else if (window.clearPlayerSync) {
@@ -437,7 +526,7 @@ window.GameApp = window.GameApp || {};
         }
     });
 
-    // ================= 9. 導出模組介面 =================
+    // ================= 10. 導出模組介面 =================
     const authModule = {
         client: dbClient,
         toggleModal,
@@ -446,7 +535,5 @@ window.GameApp = window.GameApp || {};
     };
 
     window.GameApp.auth = authModule;
-
-    // 向下相容既有全域客戶端引用
     window.dbClient = dbClient;
 })();

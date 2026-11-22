@@ -374,6 +374,68 @@ html, body {
     color: var(--text-dark);
 }
 
+/* 第三方 OAuth 登入 (Google) */
+.oauth-section {
+    width: 100%;
+}
+
+.google-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 11px 16px;
+    background-color: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.google-btn:hover:not(:disabled) {
+    background-color: #f9fafb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.google-btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.google-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.google-icon {
+    flex-shrink: 0;
+}
+
+/* 登入方式分隔線 */
+.form-divider {
+    display: flex;
+    align-items: center;
+    margin: 2px 0 6px 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.form-divider::before,
+.form-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.form-divider span {
+    padding: 0 10px;
+}
+
 /* 頁籤切換 */
 .tabs {
     display: flex;
@@ -523,6 +585,21 @@ html, body {
     margin: 6px 0;
     color: var(--text-dark);
     font-size: 14px;
+}
+
+.google-notice {
+    background: rgba(0, 151, 230, 0.08);
+    border: 1px solid rgba(0, 151, 230, 0.25);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+}
+
+.google-notice p {
+    margin: 0;
+    font-size: 13px;
+    color: #0984e3;
+    line-height: 1.5;
 }
 
 .divider {
@@ -759,6 +836,13 @@ html, body {
     .modal-panel input[type="password"] {
         padding: 14px 14px;
         font-size: 16px;
+        border-radius: 10px;
+    }
+
+    .google-btn {
+        padding: 13px 16px;
+        font-size: 15px;
+        min-height: 48px;
         border-radius: 10px;
     }
 

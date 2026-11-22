@@ -54,6 +54,30 @@ window.GameApp = window.GameApp || {};
         isImageLoaded = false;
     };
 
+    /**
+     * 動態設定角色頭像 (例如 Google 帳號頭像)
+     */
+    function setAvatarImage(url) {
+        if (!url) return;
+        const temp = new Image();
+        temp.crossOrigin = 'anonymous';
+        temp.onload = () => {
+            heroImg.src = url;
+            isImageLoaded = true;
+        };
+        temp.onerror = () => {
+            console.warn('[GameEngine] 自訂頭像載入失敗，維持原圖。');
+        };
+        temp.src = url;
+    }
+
+    /**
+     * 重設角色頭像為預設圖檔
+     */
+    function resetAvatarImage() {
+        heroImg.src = 'amiya.jpg';
+    }
+
     // 角色世界座標與物理屬性
     const avatar = {
         x: WORLD.spawnX,
@@ -500,7 +524,9 @@ window.GameApp = window.GameApp || {};
         resetPosition,
         setPosition,
         resizeCanvas,
-        updateCamera
+        updateCamera,
+        setAvatarImage,
+        resetAvatarImage
     };
 
     window.GameApp.game = gameModule;
